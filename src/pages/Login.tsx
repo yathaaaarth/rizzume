@@ -1,5 +1,7 @@
 import { type FormEvent, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
+import { PhoneAuth } from '../components/PhoneAuth'
+import { SocialAuthButtons } from '../components/SocialAuthButtons'
 import { supabase } from '../lib/supabase'
 
 const inputClass = 'rounded-2xl border-3 border-ink bg-white px-4 py-2.5 outline-none focus:border-grape'
@@ -60,6 +62,14 @@ export function Login() {
           {submitting ? 'Logging in…' : 'Log in'}
         </button>
       </form>
+
+      <div className="mt-6">
+        <SocialAuthButtons />
+      </div>
+
+      <div className="mt-4">
+        <PhoneAuth />
+      </div>
 
       <p className="mt-6 text-sm text-ink/60">
         New to Rizzume?{' '}

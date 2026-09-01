@@ -221,13 +221,17 @@ export type Database = {
           created_at: string
           full_name: string
           gender: string | null
+          goodreads_url: string | null
           hide_same_company: boolean
           id: string
           industry: string | null
+          instagram_handle: string | null
           interested_in: string | null
           is_complete: boolean
           is_paused: boolean
           job_title: string | null
+          letterboxd_url: string | null
+          linkedin_url: string | null
           location: string | null
           pal_accent: string
           pal_color: string
@@ -235,7 +239,11 @@ export type Database = {
           pal_species: string | null
           photo_urls: string[]
           prompts: Json
+          rizz_points: number
           seniority: string | null
+          social_blurb: string | null
+          social_score_breakdown: Json | null
+          social_scored_at: string | null
           updated_at: string
         }
         Insert: {
@@ -247,13 +255,17 @@ export type Database = {
           created_at?: string
           full_name: string
           gender?: string | null
+          goodreads_url?: string | null
           hide_same_company?: boolean
           id: string
           industry?: string | null
+          instagram_handle?: string | null
           interested_in?: string | null
           is_complete?: boolean
           is_paused?: boolean
           job_title?: string | null
+          letterboxd_url?: string | null
+          linkedin_url?: string | null
           location?: string | null
           pal_accent?: string
           pal_color?: string
@@ -261,7 +273,11 @@ export type Database = {
           pal_species?: string | null
           photo_urls?: string[]
           prompts?: Json
+          rizz_points?: number
           seniority?: string | null
+          social_blurb?: string | null
+          social_score_breakdown?: Json | null
+          social_scored_at?: string | null
           updated_at?: string
         }
         Update: {
@@ -273,13 +289,17 @@ export type Database = {
           created_at?: string
           full_name?: string
           gender?: string | null
+          goodreads_url?: string | null
           hide_same_company?: boolean
           id?: string
           industry?: string | null
+          instagram_handle?: string | null
           interested_in?: string | null
           is_complete?: boolean
           is_paused?: boolean
           job_title?: string | null
+          letterboxd_url?: string | null
+          linkedin_url?: string | null
           location?: string | null
           pal_accent?: string
           pal_color?: string
@@ -287,7 +307,11 @@ export type Database = {
           pal_species?: string | null
           photo_urls?: string[]
           prompts?: Json
+          rizz_points?: number
           seniority?: string | null
+          social_blurb?: string | null
+          social_score_breakdown?: Json | null
+          social_scored_at?: string | null
           updated_at?: string
         }
         Relationships: []

@@ -1,5 +1,6 @@
 import { type FormEvent, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
+import { SocialAuthButtons } from '../components/SocialAuthButtons'
 import { supabase } from '../lib/supabase'
 
 const inputClass = 'rounded-2xl border-3 border-ink bg-white px-4 py-2.5 outline-none focus:border-grape'
@@ -85,6 +86,10 @@ export function Signup() {
           {submitting ? 'Creating your account…' : 'Create account'}
         </button>
       </form>
+
+      <div className="mt-6">
+        <SocialAuthButtons />
+      </div>
 
       <p className="mt-6 text-sm text-ink/60">
         Already have an account?{' '}
