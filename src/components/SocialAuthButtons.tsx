@@ -14,16 +14,26 @@ export function SocialAuthButtons() {
   const handleClick = async (provider: (typeof PROVIDERS)[number]['key']) => {
     setError(null)
     setLoadingProvider(provider)
+
+    // On success the browser navigates away to the provider, unmounting this
+    // component — so if we're still here after a few seconds, the redirect
+    // never happened (most likely: this provider isn't enabled in Supabase
+    // yet). Fail loudly instead of leaving the button stuck forever.
+    const stuckTimer = setTimeout(() => {
+      setLoadingProvider(null)
+      setError(`${provider} sign-in didn't start — it likely isn't enabled in Supabase yet.`)
+    }, 5000)
+
     const { error: oauthError } = await supabase.auth.signInWithOAuth({
       provider,
       options: { redirectTo: `${window.location.origin}/playground` },
     })
+
     if (oauthError) {
+      clearTimeout(stuckTimer)
       setError(oauthError.message)
       setLoadingProvider(null)
     }
-    // On success the browser navigates away to the provider, so no further
-    // local state update happens here.
   }
 
   return (
