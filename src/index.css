@@ -1,14 +1,17 @@
 @import "tailwindcss";
 
 @theme {
-  --color-ink: #14121a;
-  --color-paper: #fdf9f4;
-  --color-rizz-purple: #6c2bd9;
-  --color-rizz-purple-dark: #4c1d96;
-  --color-rizz-lime: #d6fb50;
-  --color-rizz-coral: #ff5d73;
-  --font-display: "Space Grotesk", "Inter", system-ui, sans-serif;
-  --font-body: "Inter", system-ui, sans-serif;
+  --color-ink: #2b2140;
+  --color-cream: #fff8ec;
+  --color-bubblegum: #ff6fb5;
+  --color-sky: #38bdf8;
+  --color-sunshine: #ffd93d;
+  --color-grape: #8b5cf6;
+  --color-grape-dark: #6d28d9;
+  --color-mint: #4ade80;
+  --color-coral: #ff6b5b;
+  --font-display: "Fredoka", "Nunito", system-ui, sans-serif;
+  --font-body: "Nunito", system-ui, sans-serif;
 }
 
 html,
@@ -18,7 +21,66 @@ body,
 }
 
 body {
-  background-color: var(--color-paper);
+  background-color: var(--color-cream);
   color: var(--color-ink);
   font-family: var(--font-body);
+}
+
+@layer utilities {
+  .sticker-card {
+    border-width: 3px;
+    border-color: var(--color-ink);
+    border-radius: 1.5rem;
+    box-shadow: 5px 5px 0 var(--color-ink);
+  }
+
+  .sticker-btn {
+    border-width: 3px;
+    border-color: var(--color-ink);
+    border-radius: 9999px;
+    box-shadow: 3px 3px 0 var(--color-ink);
+    transition:
+      transform 0.1s ease,
+      box-shadow 0.1s ease;
+  }
+
+  .sticker-btn:active {
+    transform: translate(2px, 2px);
+    box-shadow: 1px 1px 0 var(--color-ink);
+  }
+
+  .wiggle-on-hover:hover {
+    animation: wiggle 0.4s ease-in-out;
+  }
+
+  @keyframes wiggle {
+    0%,
+    100% {
+      transform: rotate(0deg);
+    }
+    25% {
+      transform: rotate(-4deg);
+    }
+    75% {
+      transform: rotate(4deg);
+    }
+  }
+
+  @keyframes pop-in {
+    0% {
+      transform: scale(0.6);
+      opacity: 0;
+    }
+    80% {
+      transform: scale(1.05);
+      opacity: 1;
+    }
+    100% {
+      transform: scale(1);
+    }
+  }
+
+  .animate-pop-in {
+    animation: pop-in 0.35s ease-out;
+  }
 }

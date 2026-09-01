@@ -1,11 +1,12 @@
 import { useCallback, useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { MatchModal } from '../components/MatchModal'
+import { PalAvatar } from '../components/PalAvatar'
 import { useAuth } from '../context/AuthContext'
 import { useProfile, type Profile } from '../hooks/useProfile'
 import { supabase } from '../lib/supabase'
 
-export function Likes() {
+export function FanMail() {
   const { user } = useAuth()
   const { profile: myProfile } = useProfile()
   const [likers, setLikers] = useState<Profile[]>([])
@@ -61,50 +62,43 @@ export function Likes() {
 
   return (
     <div className="mx-auto max-w-2xl px-4 py-10">
-      <h1 className="font-display text-2xl font-bold">Who liked you</h1>
+      <h1 className="font-display text-2xl font-bold">Fan mail 💌</h1>
+      <p className="mt-1 text-sm text-ink/60">These pals already waved at you.</p>
 
       {loading ? (
-        <p className="mt-6 text-ink/50">Loading…</p>
+        <p className="mt-6 text-ink/50">Checking the mailbox…</p>
       ) : likers.length === 0 ? (
         <p className="mt-6 text-ink/50">
-          No pending likes yet. Head to{' '}
-          <Link to="/discover" className="font-semibold text-rizz-purple">
-            Discover
+          Nothing yet. Head to the{' '}
+          <Link to="/playground" className="font-bold text-grape">
+            Playground
           </Link>{' '}
-          and put some rizz out there.
+          and put yourself out there.
         </p>
       ) : (
         <div className="mt-6 grid grid-cols-2 gap-4 sm:grid-cols-3">
           {likers.map((liker) => (
-            <div key={liker.id} className="flex flex-col overflow-hidden rounded-2xl border border-ink/10 bg-white">
-              <div className="flex h-32 w-full items-center justify-center bg-gradient-to-br from-rizz-purple to-rizz-purple-dark text-3xl font-bold text-white">
-                {liker.photo_urls[0] ? (
-                  <img src={liker.photo_urls[0]} alt="" className="h-full w-full object-cover" />
-                ) : (
-                  liker.full_name.charAt(0).toUpperCase()
-                )}
-              </div>
-              <div className="p-3">
-                <p className="text-sm font-semibold">{liker.full_name}</p>
-                <p className="truncate text-xs text-ink/50">
-                  {liker.job_title} {liker.company && `@ ${liker.company}`}
-                </p>
-                <div className="mt-2 flex gap-2">
-                  <button
-                    onClick={() => respond(liker, 'pass')}
-                    disabled={busy}
-                    className="flex-1 rounded-full border border-ink/15 py-1.5 text-xs font-semibold text-ink/60 disabled:opacity-50"
-                  >
-                    Pass
-                  </button>
-                  <button
-                    onClick={() => respond(liker, 'like')}
-                    disabled={busy}
-                    className="flex-1 rounded-full bg-rizz-purple py-1.5 text-xs font-semibold text-white disabled:opacity-50"
-                  >
-                    Like
-                  </button>
-                </div>
+            <div key={liker.id} className="sticker-card flex flex-col items-center gap-2 bg-white p-4 text-center">
+              <PalAvatar species={liker.pal_species} primary={liker.pal_color} accent={liker.pal_accent} size={64} />
+              <p className="text-sm font-display font-bold">{liker.pal_name || liker.full_name}</p>
+              <p className="truncate text-xs text-ink/50">
+                {liker.job_title} {liker.company && `@ ${liker.company}`}
+              </p>
+              <div className="mt-1 flex gap-2">
+                <button
+                  onClick={() => respond(liker, 'pass')}
+                  disabled={busy}
+                  className="sticker-btn flex-1 bg-white py-1.5 text-xs font-bold disabled:opacity-50"
+                >
+                  👋
+                </button>
+                <button
+                  onClick={() => respond(liker, 'like')}
+                  disabled={busy}
+                  className="sticker-btn flex-1 bg-bubblegum py-1.5 text-xs font-bold text-white disabled:opacity-50"
+                >
+                  🐾
+                </button>
               </div>
             </div>
           ))}

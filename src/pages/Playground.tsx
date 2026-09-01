@@ -13,7 +13,7 @@ function yearsAgo(years: number) {
   return d.toISOString().slice(0, 10)
 }
 
-export function Discover() {
+export function Playground() {
   const { user } = useAuth()
   const { profile: myProfile, loading: myProfileLoading } = useProfile()
   const [candidates, setCandidates] = useState<Profile[]>([])
@@ -137,36 +137,28 @@ export function Discover() {
     <div className="mx-auto flex max-w-md flex-col items-center px-4 py-10">
       <div className="flex w-full items-center justify-between">
         <div>
-          <h1 className="font-display text-2xl font-bold">Discover</h1>
-          <p className="mt-1 text-sm text-ink/60">Verified professionals near you.</p>
+          <h1 className="font-display text-2xl font-bold">The Playground 🎠</h1>
+          <p className="mt-1 text-sm text-ink/60">Come meet some pals.</p>
         </div>
         <div className="flex items-center gap-2">
-          <Link
-            to="/likes"
-            className="rounded-full border border-ink/15 px-3 py-1.5 text-xs font-semibold text-ink/70 hover:border-rizz-purple hover:text-rizz-purple"
-          >
-            Likes
+          <Link to="/fan-mail" className="sticker-btn bg-white px-3 py-1.5 text-xs font-bold">
+            💌 Fan mail
           </Link>
-          <button
-            onClick={() => setShowFilters(true)}
-            className="rounded-full border border-ink/15 px-3 py-1.5 text-xs font-semibold text-ink/70 hover:border-rizz-purple hover:text-rizz-purple"
-          >
-            Filters
+          <button onClick={() => setShowFilters(true)} className="sticker-btn bg-white px-3 py-1.5 text-xs font-bold">
+            🎛️ Rules
           </button>
         </div>
       </div>
 
       <div className="mt-6 h-[520px] w-full">
         {loading || myProfileLoading ? (
-          <div className="flex h-full items-center justify-center text-ink/50">
-            Finding people worth your time…
-          </div>
+          <div className="flex h-full items-center justify-center text-ink/50">Rounding up some pals…</div>
         ) : current ? (
           <SwipeCard profile={current} />
         ) : (
-          <div className="flex h-full flex-col items-center justify-center gap-2 rounded-3xl border border-dashed border-ink/20 text-center text-ink/50">
-            <p className="font-semibold">You're all caught up</p>
-            <p className="text-sm">Try widening your filters, or check back later.</p>
+          <div className="sticker-card flex h-full flex-col items-center justify-center gap-2 border-dashed text-center text-ink/50">
+            <p className="font-display text-lg font-bold">Recess is over!</p>
+            <p className="text-sm">Try loosening the rules, or check back later.</p>
           </div>
         )}
       </div>
@@ -177,25 +169,25 @@ export function Discover() {
             onClick={handleRewind}
             disabled={!lastSwipe || busy}
             aria-label="Rewind"
-            className="flex h-12 w-12 items-center justify-center rounded-full border-2 border-ink/15 text-lg text-ink/50 shadow-sm transition hover:border-rizz-lime hover:text-ink disabled:opacity-30"
+            className="sticker-btn flex h-12 w-12 items-center justify-center bg-white text-lg disabled:opacity-30"
           >
             ↺
           </button>
           <button
             onClick={() => handleSwipe('pass')}
             disabled={busy}
-            className="flex h-16 w-16 items-center justify-center rounded-full border-2 border-ink/15 text-2xl text-ink/60 shadow-sm transition hover:border-rizz-coral hover:text-rizz-coral disabled:opacity-50"
-            aria-label="Pass"
+            className="sticker-btn flex h-16 w-16 items-center justify-center bg-white text-2xl disabled:opacity-50"
+            aria-label="Walk away"
           >
-            ✕
+            👋
           </button>
           <button
             onClick={() => handleSwipe('like')}
             disabled={busy}
-            className="flex h-16 w-16 items-center justify-center rounded-full bg-rizz-purple text-2xl text-white shadow-lg transition hover:bg-rizz-purple-dark disabled:opacity-50"
-            aria-label="Like"
+            className="sticker-btn flex h-16 w-16 items-center justify-center bg-bubblegum text-2xl text-white disabled:opacity-50"
+            aria-label="Wave hi"
           >
-            ♥
+            🐾
           </button>
         </div>
       )}
