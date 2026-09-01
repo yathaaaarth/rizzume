@@ -1,3 +1,12 @@
+export const PAL_COLORS = [
+  { primary: '#8B5CF6', accent: '#FFD93D', label: 'Grape' },
+  { primary: '#FF6FB5', accent: '#38BDF8', label: 'Bubblegum' },
+  { primary: '#38BDF8', accent: '#FFD93D', label: 'Sky' },
+  { primary: '#4ADE80', accent: '#FF6FB5', label: 'Mint' },
+  { primary: '#FFD93D', accent: '#8B5CF6', label: 'Sunshine' },
+  { primary: '#FF6B5B', accent: '#38BDF8', label: 'Coral' },
+]
+
 export const GENDERS = ['Woman', 'Man', 'Non-binary', 'Other']
 
 export const SENIORITIES = [

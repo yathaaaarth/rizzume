@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
+import { PalAvatar } from '../components/PalAvatar'
 import { useAuth } from '../context/AuthContext'
 import type { Profile } from '../hooks/useProfile'
 import { supabase } from '../lib/supabase'
@@ -7,7 +8,7 @@ import type { Tables } from '../lib/database.types'
 
 type MatchWithProfile = Tables<'matches'> & { otherProfile: Profile }
 
-export function Matches() {
+export function Pals() {
   const { user } = useAuth()
   const [matches, setMatches] = useState<MatchWithProfile[]>([])
   const [loading, setLoading] = useState(true)
@@ -51,50 +52,46 @@ export function Matches() {
 
   return (
     <div className="mx-auto max-w-2xl px-4 py-10">
-      <h1 className="font-display text-2xl font-bold">Your matches</h1>
+      <h1 className="font-display text-2xl font-bold">My Pals 🐾</h1>
 
       {loading ? (
-        <p className="mt-6 text-ink/50">Loading matches…</p>
+        <p className="mt-6 text-ink/50">Rounding them up…</p>
       ) : matches.length === 0 ? (
         <p className="mt-6 text-ink/50">
-          No matches yet &mdash; head to Discover and put some rizz out there.
+          No pals yet &mdash; head to the{' '}
+          <Link to="/playground" className="font-bold text-grape">
+            Playground
+          </Link>{' '}
+          and start waving.
         </p>
       ) : (
-        <ul className="mt-6 flex flex-col divide-y divide-ink/10 rounded-2xl border border-ink/10 bg-white">
+        <div className="mt-6 grid grid-cols-2 gap-4 sm:grid-cols-3">
           {matches.map((m) => (
-            <li key={m.id}>
-              <Link
-                to={`/chat/${m.id}`}
-                className="flex items-center gap-4 px-4 py-3 transition hover:bg-rizz-lime/20"
-              >
-                <div className="flex h-12 w-12 items-center justify-center overflow-hidden rounded-full bg-rizz-purple text-lg font-bold text-white">
-                  {m.otherProfile.photo_urls[0] ? (
-                    <img
-                      src={m.otherProfile.photo_urls[0]}
-                      alt=""
-                      className="h-full w-full object-cover"
-                    />
-                  ) : (
-                    m.otherProfile.full_name.charAt(0).toUpperCase()
-                  )}
-                </div>
-                <div>
-                  <p className="flex items-center gap-1 font-semibold">
-                    {m.otherProfile.full_name}
-                    {m.otherProfile.company_verified && (
-                      <span className="text-rizz-purple" title="Verified company email">
-                        ✓
-                      </span>
-                    )}
-                  </p>
-                  <p className="text-sm text-ink/50">
-                    {m.otherProfile.job_title} {m.otherProfile.company && `@ ${m.otherProfile.company}`}
-                  </p>
-                </div>
-              </Link>
-            </li>
+            <Link
+              key={m.id}
+              to={`/den/${m.id}`}
+              className="sticker-card wiggle-on-hover flex flex-col items-center gap-2 bg-white p-4 text-center transition"
+            >
+              <PalAvatar
+                species={m.otherProfile.pal_species}
+                primary={m.otherProfile.pal_color}
+                accent={m.otherProfile.pal_accent}
+                size={72}
+              />
+              <p className="flex items-center gap-1 font-display font-bold">
+                {m.otherProfile.pal_name || m.otherProfile.full_name}
+                {m.otherProfile.company_verified && (
+                  <span className="text-grape" title="Verified company email">
+                    ✓
+                  </span>
+                )}
+              </p>
+              <p className="truncate text-xs text-ink/50">
+                {m.otherProfile.job_title} {m.otherProfile.company && `@ ${m.otherProfile.company}`}
+              </p>
+            </Link>
           ))}
-        </ul>
+        </div>
       )}
     </div>
   )

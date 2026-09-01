@@ -1,18 +1,18 @@
 import { Navigate, Route, Routes } from 'react-router-dom'
 import { Navbar } from './components/Navbar'
 import { ProtectedRoute } from './components/ProtectedRoute'
-import { Chat } from './pages/Chat'
-import { Discover } from './pages/Discover'
+import { Den } from './pages/Den'
+import { FanMail } from './pages/FanMail'
 import { Landing } from './pages/Landing'
-import { Likes } from './pages/Likes'
 import { Login } from './pages/Login'
-import { Matches } from './pages/Matches'
 import { Onboarding } from './pages/Onboarding'
+import { Pals } from './pages/Pals'
+import { Playground } from './pages/Playground'
 import { Signup } from './pages/Signup'
 
 export function App() {
   return (
-    <div className="min-h-screen bg-paper">
+    <div className="min-h-screen bg-cream">
       <Navbar />
       <Routes>
         <Route path="/" element={<Landing />} />
@@ -35,39 +35,51 @@ export function App() {
           }
         />
         <Route
-          path="/discover"
+          path="/playground"
           element={
             <ProtectedRoute>
-              <Discover />
+              <Playground />
             </ProtectedRoute>
           }
         />
         <Route
-          path="/matches"
+          path="/pals"
           element={
             <ProtectedRoute>
-              <Matches />
+              <Pals />
             </ProtectedRoute>
           }
         />
         <Route
-          path="/likes"
+          path="/fan-mail"
           element={
             <ProtectedRoute>
-              <Likes />
+              <FanMail />
             </ProtectedRoute>
           }
         />
         <Route
-          path="/chat/:matchId"
+          path="/den/:matchId"
           element={
             <ProtectedRoute>
-              <Chat />
+              <Den />
             </ProtectedRoute>
           }
         />
+
+        {/* Redirects from the old swipe-app naming */}
+        <Route path="/discover" element={<Navigate to="/playground" replace />} />
+        <Route path="/matches" element={<Navigate to="/pals" replace />} />
+        <Route path="/likes" element={<Navigate to="/fan-mail" replace />} />
+        <Route path="/chat/:matchId" element={<ChatRedirect />} />
+
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </div>
   )
+}
+
+function ChatRedirect() {
+  const path = window.location.pathname.replace('/chat/', '/den/')
+  return <Navigate to={path} replace />
 }

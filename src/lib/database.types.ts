@@ -48,6 +48,82 @@ export type Database = {
           },
         ]
       }
+      den_items: {
+        Row: {
+          emoji: string
+          key: string
+          label: string
+          sort_order: number
+          unlock_at_messages: number
+        }
+        Insert: {
+          emoji: string
+          key: string
+          label: string
+          sort_order?: number
+          unlock_at_messages?: number
+        }
+        Update: {
+          emoji?: string
+          key?: string
+          label?: string
+          sort_order?: number
+          unlock_at_messages?: number
+        }
+        Relationships: []
+      }
+      den_placements: {
+        Row: {
+          created_at: string
+          id: string
+          item_key: string
+          match_id: string
+          placed_by: string
+          x: number
+          y: number
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          item_key: string
+          match_id: string
+          placed_by: string
+          x: number
+          y: number
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          item_key?: string
+          match_id?: string
+          placed_by?: string
+          x?: number
+          y?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "den_placements_item_key_fkey"
+            columns: ["item_key"]
+            isOneToOne: false
+            referencedRelation: "den_items"
+            referencedColumns: ["key"]
+          },
+          {
+            foreignKeyName: "den_placements_match_id_fkey"
+            columns: ["match_id"]
+            isOneToOne: false
+            referencedRelation: "matches"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "den_placements_placed_by_fkey"
+            columns: ["placed_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       disallowed_verification_domains: {
         Row: {
           domain: string
@@ -153,6 +229,10 @@ export type Database = {
           is_paused: boolean
           job_title: string | null
           location: string | null
+          pal_accent: string
+          pal_color: string
+          pal_name: string | null
+          pal_species: string | null
           photo_urls: string[]
           prompts: Json
           seniority: string | null
@@ -175,6 +255,10 @@ export type Database = {
           is_paused?: boolean
           job_title?: string | null
           location?: string | null
+          pal_accent?: string
+          pal_color?: string
+          pal_name?: string | null
+          pal_species?: string | null
           photo_urls?: string[]
           prompts?: Json
           seniority?: string | null
@@ -197,6 +281,10 @@ export type Database = {
           is_paused?: boolean
           job_title?: string | null
           location?: string | null
+          pal_accent?: string
+          pal_color?: string
+          pal_name?: string | null
+          pal_species?: string | null
           photo_urls?: string[]
           prompts?: Json
           seniority?: string | null

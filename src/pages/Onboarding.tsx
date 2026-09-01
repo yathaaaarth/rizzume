@@ -1,8 +1,9 @@
 import { type FormEvent, useEffect, useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { PAL_SPECIES, PalAvatar } from '../components/PalAvatar'
 import { useAuth } from '../context/AuthContext'
 import { useProfile } from '../hooks/useProfile'
-import { GENDERS, INDUSTRIES, PROMPT_BANK, SENIORITIES } from '../lib/constants'
+import { GENDERS, INDUSTRIES, PAL_COLORS, PROMPT_BANK, SENIORITIES } from '../lib/constants'
 import { calculateRizzScore, rizzLabel } from '../lib/rizzScore'
 import { supabase } from '../lib/supabase'
 
@@ -14,10 +15,17 @@ const EMPTY_PROMPTS: PromptAnswer[] = [
   { question: PROMPT_BANK[2], answer: '' },
 ]
 
+const inputClass =
+  'rounded-2xl border-3 border-ink bg-white px-4 py-2.5 outline-none focus:border-grape'
+
 export function Onboarding() {
   const { user } = useAuth()
   const { profile, loading, refresh } = useProfile()
   const navigate = useNavigate()
+
+  const [palName, setPalName] = useState('')
+  const [palSpecies, setPalSpecies] = useState(PAL_SPECIES[0].key as string)
+  const [palColorIdx, setPalColorIdx] = useState(0)
 
   const [fullName, setFullName] = useState('')
   const [birthdate, setBirthdate] = useState('')
@@ -52,6 +60,10 @@ export function Onboarding() {
     setExistingPhotos(profile.photo_urls ?? [])
     setHideSameCompany(profile.hide_same_company ?? true)
     setIsPaused(profile.is_paused ?? false)
+    setPalName(profile.pal_name ?? '')
+    setPalSpecies(profile.pal_species ?? PAL_SPECIES[0].key)
+    const matchedColor = PAL_COLORS.findIndex((c) => c.primary === profile.pal_color)
+    setPalColorIdx(matchedColor >= 0 ? matchedColor : 0)
 
     const savedPrompts = Array.isArray(profile.prompts) ? (profile.prompts as unknown as PromptAnswer[]) : []
     if (savedPrompts.length > 0) {
@@ -71,6 +83,8 @@ export function Onboarding() {
       }),
     [existingPhotos.length, photoFiles.length, bio, jobTitle, company, industry, prompts],
   )
+
+  const palColor = PAL_COLORS[palColorIdx]
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault()
@@ -96,6 +110,10 @@ export function Onboarding() {
       const { error: upsertError } = await supabase.from('profiles').upsert({
         id: user.id,
         full_name: fullName,
+        pal_name: palName || null,
+        pal_species: palSpecies,
+        pal_color: palColor.primary,
+        pal_accent: palColor.accent,
         birthdate: birthdate || null,
         gender: gender || null,
         interested_in: interestedIn || null,
@@ -115,7 +133,7 @@ export function Onboarding() {
       if (upsertError) throw upsertError
 
       await refresh()
-      navigate('/discover')
+      navigate('/playground')
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Something went wrong saving your profile.')
     } finally {
@@ -124,69 +142,101 @@ export function Onboarding() {
   }
 
   if (loading) {
-    return <div className="px-4 py-20 text-center text-ink/60">Loading your profile…</div>
+    return <div className="px-4 py-20 text-center text-ink/60">Loading your den…</div>
   }
 
   return (
     <div className="mx-auto max-w-xl px-4 py-16">
-      <h1 className="font-display text-3xl font-bold">Build your profile</h1>
+      <h1 className="font-display text-3xl font-bold">Build your Pal</h1>
       <p className="mt-2 text-ink/60">
-        This is what other professionals see. Be real &mdash; the title and company are the flex.
+        This cutie fronts your profile. Your real details still live underneath, for when it's time to talk shop.
       </p>
 
-      <div className="mt-6 rounded-2xl border border-ink/10 bg-white p-4">
-        <div className="flex items-center justify-between text-sm font-semibold">
-          <span>Profile strength</span>
-          <span className="text-rizz-purple">{rizzLabel(rizzScore)}</span>
+      <div className="sticker-card mt-6 flex flex-col items-center gap-4 bg-white p-6">
+        <PalAvatar species={palSpecies} primary={palColor.primary} accent={palColor.accent} size={140} />
+
+        <input
+          value={palName}
+          onChange={(e) => setPalName(e.target.value)}
+          placeholder="Name your pal (e.g. Biscuit)"
+          className={`${inputClass} w-full text-center font-display text-lg`}
+        />
+
+        <div className="flex flex-wrap justify-center gap-2">
+          {PAL_SPECIES.map((s) => (
+            <button
+              key={s.key}
+              type="button"
+              onClick={() => setPalSpecies(s.key)}
+              className={`sticker-btn px-3 py-1.5 text-sm font-bold ${
+                palSpecies === s.key ? 'bg-sunshine' : 'bg-white'
+              }`}
+            >
+              {s.emoji} {s.label}
+            </button>
+          ))}
         </div>
-        <div className="mt-2 h-2 w-full overflow-hidden rounded-full bg-ink/10">
+
+        <div className="flex flex-wrap justify-center gap-2">
+          {PAL_COLORS.map((c, idx) => (
+            <button
+              key={c.label}
+              type="button"
+              aria-label={c.label}
+              onClick={() => setPalColorIdx(idx)}
+              className={`h-9 w-9 rounded-full border-3 ${
+                palColorIdx === idx ? 'border-ink' : 'border-white'
+              }`}
+              style={{ backgroundColor: c.primary, boxShadow: palColorIdx === idx ? '2px 2px 0 #2B2140' : undefined }}
+            />
+          ))}
+        </div>
+      </div>
+
+      <div className="sticker-card mt-6 bg-white p-4">
+        <div className="flex items-center justify-between text-sm font-bold">
+          <span>Profile strength</span>
+          <span className="text-grape">{rizzLabel(rizzScore)}</span>
+        </div>
+        <div className="mt-2 h-3 w-full overflow-hidden rounded-full border-2 border-ink bg-cream">
           <div
-            className="h-full rounded-full bg-gradient-to-r from-rizz-purple to-rizz-lime transition-all"
+            className="h-full rounded-full bg-gradient-to-r from-grape to-sunshine transition-all"
             style={{ width: `${rizzScore}%` }}
           />
         </div>
       </div>
 
       <form onSubmit={handleSubmit} className="mt-8 flex flex-col gap-5">
-        <label className="flex flex-col gap-1 text-sm font-medium">
-          Full name
-          <input
-            required
-            value={fullName}
-            onChange={(e) => setFullName(e.target.value)}
-            className="rounded-xl border border-ink/15 px-4 py-2.5 outline-none focus:border-rizz-purple"
-          />
+        <label className="flex flex-col gap-1 text-sm font-bold">
+          Your real name
+          <input required value={fullName} onChange={(e) => setFullName(e.target.value)} className={inputClass} />
         </label>
 
         <div className="grid grid-cols-2 gap-4">
-          <label className="flex flex-col gap-1 text-sm font-medium">
+          <label className="flex flex-col gap-1 text-sm font-bold">
             Birthdate
             <input
               type="date"
               value={birthdate}
               onChange={(e) => setBirthdate(e.target.value)}
-              className="rounded-xl border border-ink/15 px-4 py-2.5 outline-none focus:border-rizz-purple"
+              className={inputClass}
             />
           </label>
-          <label className="flex flex-col gap-1 text-sm font-medium">
+          <label className="flex flex-col gap-1 text-sm font-bold">
             Location
             <input
               value={location}
               onChange={(e) => setLocation(e.target.value)}
               placeholder="New York, NY"
-              className="rounded-xl border border-ink/15 px-4 py-2.5 outline-none focus:border-rizz-purple"
+              className={inputClass}
             />
           </label>
         </div>
 
         <div className="grid grid-cols-2 gap-4">
-          <label className="flex flex-col gap-1 text-sm font-medium">
+          <label className="flex flex-col gap-1 text-sm font-bold">
             I am a
-            <select
-              value={gender}
-              onChange={(e) => setGender(e.target.value)}
-              className="rounded-xl border border-ink/15 px-4 py-2.5 outline-none focus:border-rizz-purple"
-            >
+            <select value={gender} onChange={(e) => setGender(e.target.value)} className={inputClass}>
               <option value="">Select</option>
               {GENDERS.map((g) => (
                 <option key={g} value={g}>
@@ -195,13 +245,9 @@ export function Onboarding() {
               ))}
             </select>
           </label>
-          <label className="flex flex-col gap-1 text-sm font-medium">
+          <label className="flex flex-col gap-1 text-sm font-bold">
             Interested in
-            <select
-              value={interestedIn}
-              onChange={(e) => setInterestedIn(e.target.value)}
-              className="rounded-xl border border-ink/15 px-4 py-2.5 outline-none focus:border-rizz-purple"
-            >
+            <select value={interestedIn} onChange={(e) => setInterestedIn(e.target.value)} className={inputClass}>
               <option value="">Select</option>
               {GENDERS.map((g) => (
                 <option key={g} value={g}>
@@ -213,44 +259,32 @@ export function Onboarding() {
           </label>
         </div>
 
-        <label className="flex flex-col gap-1 text-sm font-medium">
+        <label className="flex flex-col gap-1 text-sm font-bold">
           Bio
           <textarea
             value={bio}
             onChange={(e) => setBio(e.target.value)}
             rows={3}
             placeholder="What's your deal, beyond the job title?"
-            className="rounded-xl border border-ink/15 px-4 py-2.5 outline-none focus:border-rizz-purple"
+            className={inputClass}
           />
         </label>
 
         <div className="grid grid-cols-2 gap-4">
-          <label className="flex flex-col gap-1 text-sm font-medium">
+          <label className="flex flex-col gap-1 text-sm font-bold">
             Company
-            <input
-              value={company}
-              onChange={(e) => setCompany(e.target.value)}
-              className="rounded-xl border border-ink/15 px-4 py-2.5 outline-none focus:border-rizz-purple"
-            />
+            <input value={company} onChange={(e) => setCompany(e.target.value)} className={inputClass} />
           </label>
-          <label className="flex flex-col gap-1 text-sm font-medium">
+          <label className="flex flex-col gap-1 text-sm font-bold">
             Job title
-            <input
-              value={jobTitle}
-              onChange={(e) => setJobTitle(e.target.value)}
-              className="rounded-xl border border-ink/15 px-4 py-2.5 outline-none focus:border-rizz-purple"
-            />
+            <input value={jobTitle} onChange={(e) => setJobTitle(e.target.value)} className={inputClass} />
           </label>
         </div>
 
         <div className="grid grid-cols-2 gap-4">
-          <label className="flex flex-col gap-1 text-sm font-medium">
+          <label className="flex flex-col gap-1 text-sm font-bold">
             Industry
-            <select
-              value={industry}
-              onChange={(e) => setIndustry(e.target.value)}
-              className="rounded-xl border border-ink/15 px-4 py-2.5 outline-none focus:border-rizz-purple"
-            >
+            <select value={industry} onChange={(e) => setIndustry(e.target.value)} className={inputClass}>
               <option value="">Select</option>
               {INDUSTRIES.map((i) => (
                 <option key={i} value={i}>
@@ -259,13 +293,9 @@ export function Onboarding() {
               ))}
             </select>
           </label>
-          <label className="flex flex-col gap-1 text-sm font-medium">
+          <label className="flex flex-col gap-1 text-sm font-bold">
             Seniority
-            <select
-              value={seniority}
-              onChange={(e) => setSeniority(e.target.value)}
-              className="rounded-xl border border-ink/15 px-4 py-2.5 outline-none focus:border-rizz-purple"
-            >
+            <select value={seniority} onChange={(e) => setSeniority(e.target.value)} className={inputClass}>
               <option value="">Select</option>
               {SENIORITIES.map((s) => (
                 <option key={s} value={s}>
@@ -276,27 +306,27 @@ export function Onboarding() {
           </label>
         </div>
 
-        <label className="flex flex-col gap-1 text-sm font-medium">
-          Photos
+        <label className="flex flex-col gap-1 text-sm font-bold">
+          Photos (peeking-behind-the-pal reveal)
           <input
             type="file"
             accept="image/*"
             multiple
             onChange={(e) => setPhotoFiles(Array.from(e.target.files ?? []))}
-            className="rounded-xl border border-ink/15 px-4 py-2.5 outline-none focus:border-rizz-purple"
+            className={inputClass}
           />
         </label>
 
         {existingPhotos.length > 0 && (
           <div className="flex gap-2">
             {existingPhotos.map((url) => (
-              <img key={url} src={url} alt="" className="h-20 w-20 rounded-xl object-cover" />
+              <img key={url} src={url} alt="" className="h-20 w-20 rounded-2xl border-3 border-ink object-cover" />
             ))}
           </div>
         )}
 
-        <div className="flex flex-col gap-4 rounded-2xl border border-ink/10 bg-white p-4">
-          <p className="text-sm font-semibold">Prompts</p>
+        <div className="sticker-card flex flex-col gap-4 bg-white p-4">
+          <p className="text-sm font-bold">Prompts</p>
           <p className="-mt-3 text-xs text-ink/50">
             Pick a few conversation-starters. More interesting than "I like hiking."
           </p>
@@ -309,7 +339,7 @@ export function Onboarding() {
                   next[idx] = { ...next[idx], question: e.target.value }
                   setPrompts(next)
                 }}
-                className="rounded-xl border border-ink/15 px-4 py-2 text-sm outline-none focus:border-rizz-purple"
+                className={`${inputClass} text-sm`}
               >
                 {PROMPT_BANK.map((q) => (
                   <option key={q} value={q}>
@@ -325,14 +355,14 @@ export function Onboarding() {
                   setPrompts(next)
                 }}
                 placeholder="Your answer"
-                className="rounded-xl border border-ink/15 px-4 py-2 text-sm outline-none focus:border-rizz-purple"
+                className={`${inputClass} text-sm`}
               />
             </div>
           ))}
         </div>
 
-        <div className="flex flex-col gap-3 rounded-2xl border border-ink/10 bg-white p-4">
-          <label className="flex items-center justify-between gap-4 text-sm font-medium">
+        <div className="sticker-card flex flex-col gap-3 bg-white p-4">
+          <label className="flex items-center justify-between gap-4 text-sm font-bold">
             <span>
               Hide people from my company
               <span className="block text-xs font-normal text-ink/50">
@@ -343,33 +373,33 @@ export function Onboarding() {
               type="checkbox"
               checked={hideSameCompany}
               onChange={(e) => setHideSameCompany(e.target.checked)}
-              className="h-5 w-5 accent-rizz-purple"
+              className="h-5 w-5 accent-grape"
             />
           </label>
-          <label className="flex items-center justify-between gap-4 text-sm font-medium">
+          <label className="flex items-center justify-between gap-4 text-sm font-bold">
             <span>
               Out of office
               <span className="block text-xs font-normal text-ink/50">
-                Pause your profile &mdash; you won't appear in anyone's Discover.
+                Pause your pal &mdash; nobody sees you in the Playground.
               </span>
             </span>
             <input
               type="checkbox"
               checked={isPaused}
               onChange={(e) => setIsPaused(e.target.checked)}
-              className="h-5 w-5 accent-rizz-purple"
+              className="h-5 w-5 accent-grape"
             />
           </label>
         </div>
 
-        {error && <p className="text-sm text-rizz-coral">{error}</p>}
+        {error && <p className="text-sm font-bold text-coral">{error}</p>}
 
         <button
           type="submit"
           disabled={submitting}
-          className="mt-2 rounded-full bg-ink px-6 py-3 font-semibold text-paper transition hover:bg-rizz-purple disabled:opacity-50"
+          className="sticker-btn mt-2 bg-grape px-6 py-3 font-display font-bold text-white disabled:opacity-50"
         >
-          {submitting ? 'Saving…' : 'Save & start swiping'}
+          {submitting ? 'Saving…' : 'Save & head to the Playground'}
         </button>
       </form>
     </div>
