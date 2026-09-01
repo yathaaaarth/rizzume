@@ -302,7 +302,7 @@ export function Den() {
             placeholder="Type a message…"
             className="flex-1 rounded-full border-3 border-ink px-4 py-2.5 outline-none focus:border-grape"
           />
-          <button type="submit" disabled={!draft.trim()} className="sticker-btn bg-ink px-6 font-bold text-paper disabled:opacity-40">
+          <button type="submit" disabled={!draft.trim()} className="sticker-btn bg-ink px-6 font-bold text-cream disabled:opacity-40">
             Send
           </button>
         </form>
