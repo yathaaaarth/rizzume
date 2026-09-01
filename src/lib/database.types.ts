@@ -12,6 +12,54 @@ export type Database = {
   }
   public: {
     Tables: {
+      blocks: {
+        Row: {
+          blocked_id: string
+          blocker_id: string
+          created_at: string
+          id: string
+        }
+        Insert: {
+          blocked_id: string
+          blocker_id: string
+          created_at?: string
+          id?: string
+        }
+        Update: {
+          blocked_id?: string
+          blocker_id?: string
+          created_at?: string
+          id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "blocks_blocked_id_fkey"
+            columns: ["blocked_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "blocks_blocker_id_fkey"
+            columns: ["blocker_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      disallowed_verification_domains: {
+        Row: {
+          domain: string
+        }
+        Insert: {
+          domain: string
+        }
+        Update: {
+          domain?: string
+        }
+        Relationships: []
+      }
       matches: {
         Row: {
           created_at: string
@@ -92,16 +140,21 @@ export type Database = {
           bio: string | null
           birthdate: string | null
           company: string | null
+          company_domain: string | null
+          company_verified: boolean
           created_at: string
           full_name: string
           gender: string | null
+          hide_same_company: boolean
           id: string
           industry: string | null
           interested_in: string | null
           is_complete: boolean
+          is_paused: boolean
           job_title: string | null
           location: string | null
           photo_urls: string[]
+          prompts: Json
           seniority: string | null
           updated_at: string
         }
@@ -109,16 +162,21 @@ export type Database = {
           bio?: string | null
           birthdate?: string | null
           company?: string | null
+          company_domain?: string | null
+          company_verified?: boolean
           created_at?: string
           full_name: string
           gender?: string | null
+          hide_same_company?: boolean
           id: string
           industry?: string | null
           interested_in?: string | null
           is_complete?: boolean
+          is_paused?: boolean
           job_title?: string | null
           location?: string | null
           photo_urls?: string[]
+          prompts?: Json
           seniority?: string | null
           updated_at?: string
         }
@@ -126,20 +184,67 @@ export type Database = {
           bio?: string | null
           birthdate?: string | null
           company?: string | null
+          company_domain?: string | null
+          company_verified?: boolean
           created_at?: string
           full_name?: string
           gender?: string | null
+          hide_same_company?: boolean
           id?: string
           industry?: string | null
           interested_in?: string | null
           is_complete?: boolean
+          is_paused?: boolean
           job_title?: string | null
           location?: string | null
           photo_urls?: string[]
+          prompts?: Json
           seniority?: string | null
           updated_at?: string
         }
         Relationships: []
+      }
+      reports: {
+        Row: {
+          created_at: string
+          details: string | null
+          id: string
+          reason: string
+          reported_id: string
+          reporter_id: string
+        }
+        Insert: {
+          created_at?: string
+          details?: string | null
+          id?: string
+          reason: string
+          reported_id: string
+          reporter_id: string
+        }
+        Update: {
+          created_at?: string
+          details?: string | null
+          id?: string
+          reason?: string
+          reported_id?: string
+          reporter_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "reports_reported_id_fkey"
+            columns: ["reported_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "reports_reporter_id_fkey"
+            columns: ["reporter_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       swipes: {
         Row: {

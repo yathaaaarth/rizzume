@@ -1,11 +1,18 @@
-import { type FormEvent, useEffect, useState } from 'react'
+import { type FormEvent, useEffect, useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
 import { useProfile } from '../hooks/useProfile'
+import { GENDERS, INDUSTRIES, PROMPT_BANK, SENIORITIES } from '../lib/constants'
+import { calculateRizzScore, rizzLabel } from '../lib/rizzScore'
 import { supabase } from '../lib/supabase'
 
-const GENDERS = ['Woman', 'Man', 'Non-binary', 'Other']
-const SENIORITIES = ['Entry-level', 'Mid-level', 'Senior', 'Manager', 'Director', 'Executive/Founder']
+type PromptAnswer = { question: string; answer: string }
+
+const EMPTY_PROMPTS: PromptAnswer[] = [
+  { question: PROMPT_BANK[0], answer: '' },
+  { question: PROMPT_BANK[1], answer: '' },
+  { question: PROMPT_BANK[2], answer: '' },
+]
 
 export function Onboarding() {
   const { user } = useAuth()
@@ -24,6 +31,9 @@ export function Onboarding() {
   const [location, setLocation] = useState('')
   const [photoFiles, setPhotoFiles] = useState<File[]>([])
   const [existingPhotos, setExistingPhotos] = useState<string[]>([])
+  const [prompts, setPrompts] = useState<PromptAnswer[]>(EMPTY_PROMPTS)
+  const [hideSameCompany, setHideSameCompany] = useState(true)
+  const [isPaused, setIsPaused] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [submitting, setSubmitting] = useState(false)
 
@@ -40,7 +50,27 @@ export function Onboarding() {
     setSeniority(profile.seniority ?? '')
     setLocation(profile.location ?? '')
     setExistingPhotos(profile.photo_urls ?? [])
+    setHideSameCompany(profile.hide_same_company ?? true)
+    setIsPaused(profile.is_paused ?? false)
+
+    const savedPrompts = Array.isArray(profile.prompts) ? (profile.prompts as unknown as PromptAnswer[]) : []
+    if (savedPrompts.length > 0) {
+      setPrompts([0, 1, 2].map((i) => savedPrompts[i] ?? EMPTY_PROMPTS[i]))
+    }
   }, [profile])
+
+  const rizzScore = useMemo(
+    () =>
+      calculateRizzScore({
+        photoCount: existingPhotos.length + photoFiles.length,
+        bio,
+        jobTitle,
+        company,
+        industry,
+        promptCount: prompts.filter((p) => p.answer.trim()).length,
+      }),
+    [existingPhotos.length, photoFiles.length, bio, jobTitle, company, industry, prompts],
+  )
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault()
@@ -61,6 +91,7 @@ export function Onboarding() {
       }
 
       const photoUrls = [...existingPhotos, ...uploadedUrls]
+      const cleanPrompts = prompts.filter((p) => p.answer.trim())
 
       const { error: upsertError } = await supabase.from('profiles').upsert({
         id: user.id,
@@ -75,6 +106,9 @@ export function Onboarding() {
         seniority: seniority || null,
         location: location || null,
         photo_urls: photoUrls,
+        prompts: cleanPrompts,
+        hide_same_company: hideSameCompany,
+        is_paused: isPaused,
         is_complete: true,
       })
 
@@ -99,6 +133,19 @@ export function Onboarding() {
       <p className="mt-2 text-ink/60">
         This is what other professionals see. Be real &mdash; the title and company are the flex.
       </p>
+
+      <div className="mt-6 rounded-2xl border border-ink/10 bg-white p-4">
+        <div className="flex items-center justify-between text-sm font-semibold">
+          <span>Profile strength</span>
+          <span className="text-rizz-purple">{rizzLabel(rizzScore)}</span>
+        </div>
+        <div className="mt-2 h-2 w-full overflow-hidden rounded-full bg-ink/10">
+          <div
+            className="h-full rounded-full bg-gradient-to-r from-rizz-purple to-rizz-lime transition-all"
+            style={{ width: `${rizzScore}%` }}
+          />
+        </div>
+      </div>
 
       <form onSubmit={handleSubmit} className="mt-8 flex flex-col gap-5">
         <label className="flex flex-col gap-1 text-sm font-medium">
@@ -199,12 +246,18 @@ export function Onboarding() {
         <div className="grid grid-cols-2 gap-4">
           <label className="flex flex-col gap-1 text-sm font-medium">
             Industry
-            <input
+            <select
               value={industry}
               onChange={(e) => setIndustry(e.target.value)}
-              placeholder="Tech, Finance, Law…"
               className="rounded-xl border border-ink/15 px-4 py-2.5 outline-none focus:border-rizz-purple"
-            />
+            >
+              <option value="">Select</option>
+              {INDUSTRIES.map((i) => (
+                <option key={i} value={i}>
+                  {i}
+                </option>
+              ))}
+            </select>
           </label>
           <label className="flex flex-col gap-1 text-sm font-medium">
             Seniority
@@ -241,6 +294,73 @@ export function Onboarding() {
             ))}
           </div>
         )}
+
+        <div className="flex flex-col gap-4 rounded-2xl border border-ink/10 bg-white p-4">
+          <p className="text-sm font-semibold">Prompts</p>
+          <p className="-mt-3 text-xs text-ink/50">
+            Pick a few conversation-starters. More interesting than "I like hiking."
+          </p>
+          {prompts.map((p, idx) => (
+            <div key={idx} className="flex flex-col gap-1">
+              <select
+                value={p.question}
+                onChange={(e) => {
+                  const next = [...prompts]
+                  next[idx] = { ...next[idx], question: e.target.value }
+                  setPrompts(next)
+                }}
+                className="rounded-xl border border-ink/15 px-4 py-2 text-sm outline-none focus:border-rizz-purple"
+              >
+                {PROMPT_BANK.map((q) => (
+                  <option key={q} value={q}>
+                    {q}
+                  </option>
+                ))}
+              </select>
+              <input
+                value={p.answer}
+                onChange={(e) => {
+                  const next = [...prompts]
+                  next[idx] = { ...next[idx], answer: e.target.value }
+                  setPrompts(next)
+                }}
+                placeholder="Your answer"
+                className="rounded-xl border border-ink/15 px-4 py-2 text-sm outline-none focus:border-rizz-purple"
+              />
+            </div>
+          ))}
+        </div>
+
+        <div className="flex flex-col gap-3 rounded-2xl border border-ink/10 bg-white p-4">
+          <label className="flex items-center justify-between gap-4 text-sm font-medium">
+            <span>
+              Hide people from my company
+              <span className="block text-xs font-normal text-ink/50">
+                Only works once your work email is verified.
+              </span>
+            </span>
+            <input
+              type="checkbox"
+              checked={hideSameCompany}
+              onChange={(e) => setHideSameCompany(e.target.checked)}
+              className="h-5 w-5 accent-rizz-purple"
+            />
+          </label>
+          <label className="flex items-center justify-between gap-4 text-sm font-medium">
+            <span>
+              Out of office
+              <span className="block text-xs font-normal text-ink/50">
+                Pause your profile &mdash; you won't appear in anyone's Discover.
+              </span>
+            </span>
+            <input
+              type="checkbox"
+              checked={isPaused}
+              onChange={(e) => setIsPaused(e.target.checked)}
+              className="h-5 w-5 accent-rizz-purple"
+            />
+          </label>
+        </div>
 
         {error && <p className="text-sm text-rizz-coral">{error}</p>}
 

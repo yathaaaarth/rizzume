@@ -1,7 +1,10 @@
 import { Link } from 'react-router-dom'
 import type { Profile } from '../hooks/useProfile'
+import { matchReasons } from '../lib/rizzScore'
 
-export function MatchModal({ profile, onClose }: { profile: Profile; onClose: () => void }) {
+export function MatchModal({ me, profile, onClose }: { me: Profile; profile: Profile; onClose: () => void }) {
+  const reasons = matchReasons(me, profile)
+
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-ink/60 px-4">
       <div className="flex max-w-sm flex-col items-center rounded-3xl bg-paper p-8 text-center shadow-2xl">
@@ -14,6 +17,20 @@ export function MatchModal({ profile, onClose }: { profile: Profile; onClose: ()
         <p className="mt-2 text-ink/70">
           You both have rizz. Time to talk about something other than your job title.
         </p>
+
+        {reasons.length > 0 && (
+          <div className="mt-4 flex flex-wrap justify-center gap-2">
+            {reasons.map((r) => (
+              <span
+                key={r}
+                className="rounded-full bg-ink/5 px-3 py-1 text-xs font-semibold text-ink/70"
+              >
+                {r}
+              </span>
+            ))}
+          </div>
+        )}
+
         <div className="mt-6 flex w-full gap-3">
           <button
             onClick={onClose}

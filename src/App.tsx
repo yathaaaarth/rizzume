@@ -4,6 +4,7 @@ import { ProtectedRoute } from './components/ProtectedRoute'
 import { Chat } from './pages/Chat'
 import { Discover } from './pages/Discover'
 import { Landing } from './pages/Landing'
+import { Likes } from './pages/Likes'
 import { Login } from './pages/Login'
 import { Matches } from './pages/Matches'
 import { Onboarding } from './pages/Onboarding'
@@ -46,6 +47,14 @@ export function App() {
           element={
             <ProtectedRoute>
               <Matches />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/likes"
+          element={
+            <ProtectedRoute>
+              <Likes />
             </ProtectedRoute>
           }
         />

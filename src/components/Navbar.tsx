@@ -21,6 +21,9 @@ export function Navbar() {
             <NavLink to="/discover" className={linkClasses}>
               Discover
             </NavLink>
+            <NavLink to="/likes" className={linkClasses}>
+              Likes
+            </NavLink>
             <NavLink to="/matches" className={linkClasses}>
               Matches
             </NavLink>

@@ -79,7 +79,14 @@ export function Matches() {
                   )}
                 </div>
                 <div>
-                  <p className="font-semibold">{m.otherProfile.full_name}</p>
+                  <p className="flex items-center gap-1 font-semibold">
+                    {m.otherProfile.full_name}
+                    {m.otherProfile.company_verified && (
+                      <span className="text-rizz-purple" title="Verified company email">
+                        ✓
+                      </span>
+                    )}
+                  </p>
                   <p className="text-sm text-ink/50">
                     {m.otherProfile.job_title} {m.otherProfile.company && `@ ${m.otherProfile.company}`}
                   </p>
